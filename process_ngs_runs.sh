@@ -2,7 +2,7 @@
 
 RUNFOLDER_PATH="/mnt/run"
 SAMPLESHEET_PATH="/mnt/samplesheets"
-OUTPUTFOLDER_PATH_PREFIX="/mnt/run/"
+OUTPUTFOLDER_PATH_PREFIX="/mnt/run"
 OUTPUTFOLDER_PATH_SUBDIR="/Data/Intensities/BaseCalls"
 TARGETFOLDER_PATH="/mnt/target"
 LOG_PATH="/var/log/bcl-convert"
