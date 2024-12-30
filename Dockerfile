@@ -1,4 +1,7 @@
 FROM centos:7
+
+# Add a user with UID 1000
+RUN useradd -u 1000 -m user1000
 #
 # You'll need to download bcl-convert-3.6.3-1.el7.x86_64.rpm from
 # https://support.illumina.com/downloads/bcl-convert-downloads.html

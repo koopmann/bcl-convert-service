@@ -17,6 +17,10 @@ sendMail() {
   local body=$2
   local recipients=$(IFS=,; echo "${RECIPIENTS[*]}")
 
+  echo "Sending email with subject: ${subject}"
+  echo "Email body: ${body}"
+  echo "Recipients: ${recipients}"
+
   echo -e "Subject:${subject}\n\n${body}" | mail -s "${subject}" -S smtp="${SMTP_SERVER}:${SMTP_PORT}" -S smtp-auth-user="${SMTP_USER}" -S smtp-auth-password="${SMTP_PASS}" ${recipients}
 }
 
@@ -28,6 +32,9 @@ process_ngs_runs() {
       sample_sheet_full_path="$SAMPLESHEET_PATH/${runname}_SampleSheet.csv"
       outputfolder_run_path="$OUTPUTFOLDER_PATH_PREFIX/${runname}"
       outputfolder_run_path_subdir="${outputfolder_run_path}$OUTPUTFOLDER_PATH_SUBDIR"
+
+      targetfolder_run_path="$TARGETFOLDER_PATH/${runname}"
+      targetfolder_run_path_subdir="${targetfolder_run_path}$OUTPUTFOLDER_PATH_SUBDIR"
 
       echo "Processing folder: $runfolder"
       echo "Run name: $runname"
@@ -86,8 +93,8 @@ process_ngs_runs() {
             done
 
             echo "Copying output to target folder..."
-            cp -rp "$outputfolder_run_path_subdir" "$TARGETFOLDER_PATH/"
-            echo "Running rsync..."
+            cp -rp "$outputfolder_run_path_subdir/" "$targetfolder_run_path_subdir/" && \
+            echo "Running rsync..." && \
             rsync -aiu "$runfolder/" "$TARGETFOLDER_PATH/$runname/" >> "$LOG_PATH/preprocess_ngs_rsync.log"
             if [ $? -ne 0 ]; then
               echo "Rsync failed for Run: $runfolder"
