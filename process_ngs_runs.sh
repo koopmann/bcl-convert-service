@@ -22,6 +22,12 @@ sendMail() {
   echo "Recipients: ${recipients}"
 
   echo -e "Subject:${subject}\n\n${body}" | mail -s "${subject}" -S smtp="${SMTP_SERVER}:${SMTP_PORT}" -S smtp-auth-user="${SMTP_USER}" -S smtp-auth-password="${SMTP_PASS}" ${recipients}
+
+  if [ $? -eq 0 ]; then
+    echo "Email sent successfully."
+  else
+    echo "Failed to send email."
+  fi
 }
 
 process_ngs_runs() {
