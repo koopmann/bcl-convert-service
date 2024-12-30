@@ -39,6 +39,30 @@ process_ngs_runs() {
         continue
       fi
 
+      if [ -f "$sample_sheet_full_path" ]; then
+        echo "Sample sheet found: $sample_sheet_full_path"
+      else
+        echo "Sample sheet missing: $sample_sheet_full_path"
+      fi
+
+      if [ -f "$runfolder/CopyComplete.txt" ]; then
+        echo "CopyComplete.txt found in $runfolder"
+      else
+        echo "CopyComplete.txt missing in $runfolder"
+      fi
+
+      if [ -f "$runfolder/RTAComplete.txt" ]; then
+        echo "RTAComplete.txt found in $runfolder"
+      else
+        echo "RTAComplete.txt missing in $runfolder"
+      fi
+
+      if [ -f "$outputfolder_run_path_subdir/Logs/FastqComplete.txt" ]; then
+        echo "FastqComplete.txt already exists in $outputfolder_run_path_subdir"
+      else
+        echo "FastqComplete.txt missing in $outputfolder_run_path_subdir"
+      fi
+
       if [ -f "$sample_sheet_full_path" ] && [ -f "$runfolder/CopyComplete.txt" ] && [ -f "$runfolder/RTAComplete.txt" ] && [ ! -f "$outputfolder_run_path_subdir/Logs/FastqComplete.txt" ]; then
         already_processed=false
         for file in "$outputfolder_run_path_subdir/"*.fastq.gz; do
