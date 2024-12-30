@@ -21,12 +21,8 @@ sendMail() {
   echo "Email body: ${body}"
   echo "Recipients: ${recipients}"
 
-  {
-    echo "To: ${recipients}"
-    echo "Subject: ${subject}"
-    echo
-    echo "${body}"
-  } | msmtp --host="${SMTP_SERVER}" --port="${SMTP_PORT}" --auth=on --user="${SMTP_USER}" --passwordeval="echo ${SMTP_PASS}" --tls=on --tls-starttls=on ${recipients}
+# Send the email
+  echo -e "Subject: ${subject}\n\n${body}" | msmtp ${recipients}
 
   if [ $? -eq 0 ]; then
     echo "Email sent successfully."
