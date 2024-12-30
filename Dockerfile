@@ -27,7 +27,7 @@ RUN sed -i s/^mirrorlist=http/#mirrorlist=http/g /etc/yum.repos.d/CentOS-*.repo
 
 ADD bcl-convert-4.3.6-2.el7.x86_64.rpm /tmp/bcl-convert.rpm
 
-RUN yum install -y gdb rsync mailx && \
+RUN yum install -y gdb rsync mailx msmtp && \
     rpm -i /tmp/bcl-convert.rpm && \
     rm /tmp/bcl-convert.rpm && \
     yum clean all && \

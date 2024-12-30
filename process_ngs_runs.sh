@@ -21,7 +21,12 @@ sendMail() {
   echo "Email body: ${body}"
   echo "Recipients: ${recipients}"
 
-  echo -e "Subject:${subject}\n\n${body}" | mail -s "${subject}" -S smtp="${SMTP_SERVER}:${SMTP_PORT}" -S smtp-auth-user="${SMTP_USER}" -S smtp-auth-password="${SMTP_PASS}" ${recipients}
+  {
+    echo "To: ${recipients}"
+    echo "Subject: ${subject}"
+    echo
+    echo "${body}"
+  } | msmtp --host="${SMTP_SERVER}" --port="${SMTP_PORT}" --auth=on --user="${SMTP_USER}" --passwordeval="echo ${SMTP_PASS}" --tls=on --tls-starttls=on ${recipients}
 
   if [ $? -eq 0 ]; then
     echo "Email sent successfully."
@@ -99,6 +104,7 @@ process_ngs_runs() {
             done
 
             echo "Copying output to target folder..."
+            mkdir -p "$targetfolder_run_path_subdir"
             cp -rp "$outputfolder_run_path_subdir/" "$targetfolder_run_path_subdir/" && \
             echo "Running rsync..." && \
             rsync -aiu "$runfolder/" "$TARGETFOLDER_PATH/$runname/" >> "$LOG_PATH/preprocess_ngs_rsync.log"
