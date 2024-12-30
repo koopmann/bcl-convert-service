@@ -17,7 +17,7 @@ sendMail() {
   local body=$2
   local recipients=$(IFS=,; echo "${RECIPIENTS[*]}")
 
-  echo -e "Subject:${subject}\n\n${body}" | sendmail -S "${SMTP_SERVER}:${SMTP_PORT}" -au"${SMTP_USER}" -ap"${SMTP_PASS}" ${recipients}
+  echo -e "Subject:${subject}\n\n${body}" | mail -s "${subject}" -S smtp="${SMTP_SERVER}:${SMTP_PORT}" -S smtp-auth-user="${SMTP_USER}" -S smtp-auth-password="${SMTP_PASS}" ${recipients}
 }
 
 process_ngs_runs() {
