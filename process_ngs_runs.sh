@@ -1,0 +1,92 @@
+#!/bin/bash
+
+RUNFOLDER_PATH="/mnt/run"
+SAMPLESHEET_PATH="/mnt/samplesheets"
+OUTPUTFOLDER_PATH_PREFIX="/mnt/run/"
+OUTPUTFOLDER_PATH_SUBDIR="/Data/Intensities/BaseCalls"
+TARGETFOLDER_PATH="/mnt/target"
+LOG_PATH="/var/log/bcl-convert"
+SMTP_SERVER=${SMTP_SERVER}
+SMTP_PORT=${SMTP_PORT}
+SMTP_USER=${SMTP_USER}
+SMTP_PASS=${SMTP_PASS}
+IFS=',' read -r -a RECIPIENTS <<< "${RECIPIENTS}"
+
+sendMail() {
+  local subject=$1
+  local body=$2
+  local recipients=$(IFS=,; echo "${RECIPIENTS[*]}")
+
+  echo -e "Subject:${subject}\n\n${body}" | sendmail -S "${SMTP_SERVER}:${SMTP_PORT}" -au"${SMTP_USER}" -ap"${SMTP_PASS}" ${recipients}
+}
+
+process_ngs_runs() {
+  echo "Starting NGS run processing..."
+  for runfolder in "$RUNFOLDER_PATH"/*; do
+    if [ -d "$runfolder" ]; then
+      runname=$(basename "$runfolder")
+      sample_sheet_full_path="$SAMPLESHEET_PATH/${runname}_SampleSheet.csv"
+      outputfolder_run_path="$OUTPUTFOLDER_PATH_PREFIX/${runname}"
+      outputfolder_run_path_subdir="${outputfolder_run_path}$OUTPUTFOLDER_PATH_SUBDIR"
+
+      echo "Processing folder: $runfolder"
+      echo "Run name: $runname"
+      echo "Sample sheet path: $sample_sheet_full_path"
+      echo "Output folder path: $outputfolder_run_path_subdir"
+
+      if [ "$runname" == ".stfolder" ]; then
+        echo "Skipping .stfolder"
+        continue
+      fi
+
+      if [ -f "$sample_sheet_full_path" ] && [ -f "$runfolder/CopyComplete.txt" ] && [ -f "$runfolder/RTAComplete.txt" ] && [ ! -f "$outputfolder_run_path_subdir/Logs/FastqComplete.txt" ]; then
+        already_processed=false
+        for file in "$outputfolder_run_path_subdir/"*.fastq.gz; do
+          if [ -f "$file" ]; then
+            already_processed=true
+            echo "Skipped folder because of existing fastq.gz: $file"
+            break
+          fi
+        done
+
+        if [ "$already_processed" = false ]; then
+          if [ -z "$(find "$runfolder" -mmin -5)" ]; then
+            echo "Start processing folder: $runfolder"
+            command="bcl-convert --strict-mode true --force --bcl-only-matched-reads true --bcl-sampleproject-subdirectories true --bcl-input-directory $runfolder --sample-sheet $sample_sheet_full_path --output-directory $outputfolder_run_path_subdir > $outputfolder_run_path_subdir/bcl2fastq2_output.txt"
+            echo "Executing command: $command"
+            eval "$command"
+
+            while [ ! -f "$outputfolder_run_path_subdir/Logs/FastqComplete.txt" ]; do
+              echo "Waiting for FastqComplete.txt..."
+              sleep 120
+            done
+
+            echo "Copying output to target folder..."
+            cp -rp "$outputfolder_run_path_subdir" "$TARGETFOLDER_PATH/"
+            echo "Running rsync..."
+            rsync -aiu "$runfolder/" "$TARGETFOLDER_PATH/$runname/" >> "$LOG_PATH/preprocess_ngs_rsync.log"
+            if [ $? -ne 0 ]; then
+              echo "Rsync failed for Run: $runfolder"
+              sendMail "Rsync failed for Run: $runfolder" "Lauf: $runfolder"
+            fi
+
+            echo "BCL to FASTQ conversion complete for Run: $runfolder"
+            sendMail "BCL to FASTQ conversion complete for Run: $runfolder" "Lauf: $runfolder"
+          fi
+        fi
+      else
+        echo "Skipped folder because of missing sheet, or not RTAComplete or existing FastqComplete: $runfolder"
+      fi
+
+      if [ -f "$sample_sheet_full_path" ] && [ ! -f "$runfolder/RTAComplete.txt" ] && [ -f "$outputfolder_run_path_subdir/Logs/FastqComplete.txt" ]; then
+        echo "Removing folder: $runfolder"
+        rm -rf "$runfolder"
+      fi
+    else
+      echo "No directories found in $RUNFOLDER_PATH"
+    fi
+  done
+  echo "NGS run processing complete."
+}
+
+process_ngs_runs

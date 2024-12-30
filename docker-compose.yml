@@ -1,0 +1,24 @@
+services:
+  bcl-convert-service:
+    container_name: bcl-convert-service
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      - SMTP_SERVER=${SMTP_SERVER}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - RECIPIENTS=${RECIPIENTS}
+    volumes:
+      - ${RUNFOLDER_PATH}:/mnt/run
+      - ${SAMPLESHEET_PATH}:/mnt/samplesheets
+      - ${TARGETFOLDER_PATH}:/mnt/target
+      - ${LOG_PATH}:/var/log/bcl-convert
+      - ./process_ngs_runs.sh:/usr/local/bin/process_ngs_runs.sh
+    image: bcl-convert-service
+    user: "1000:1000"
+    deploy:
+      resources:
+        limits:
+          memory: 65g

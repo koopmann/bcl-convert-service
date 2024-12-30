@@ -1,0 +1,15 @@
+# Created by .ignore support plugin (hsz.mobi)
+
+.idea
+nbproject
+
+# Ignore mac hidden .DS_Store
+.DS_Store
+
+# ignore tools and build dir
+/vendor/
+
+.env
+/bcl-convert-4.3.6-2.el7.x86_64.rpm
+/logs/*
+!/logs/
