@@ -1,7 +1,11 @@
 import os
 import smtplib
+import logging
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def send_mail(subject, body, recipients):
     smtp_server = os.getenv("SMTP_SERVER")
@@ -10,12 +14,13 @@ def send_mail(subject, body, recipients):
     smtp_pass = os.getenv("SMTP_PASS")
 
     if not recipients or not subject:
-        print("Missing environment variables: recipients or subject")
+        logging.error("Missing environment variables: recipients or subject")
         return
 
-    print(f"Sending email with subject: {subject}")
-    print(f"Email body: {body}")
-    print(f"Recipients: {recipients}")
+    logging.debug(f"SMTP Server: {smtp_server}")
+    logging.debug(f"SMTP Port: {smtp_port}")
+    logging.debug(f"SMTP User: {smtp_user}")
+    logging.debug(f"Recipients: {recipients}")
 
     # Create the email
     msg = MIMEMultipart()
@@ -24,20 +29,26 @@ def send_mail(subject, body, recipients):
     msg['Subject'] = subject
     msg.attach(MIMEText(body, 'plain'))
 
+    logging.debug("Email created successfully")
+
     try:
         # Connect to the SMTP server
+        logging.debug("Connecting to SMTP server...")
         server = smtplib.SMTP_SSL(smtp_server, smtp_port)
+        server.set_debuglevel(1)  # Enable smtplib debug output
+        logging.debug("Logging in to SMTP server...")
         server.login(smtp_user, smtp_pass)
+        logging.debug("Sending email...")
         server.sendmail(smtp_user, recipients.split(','), msg.as_string())
         server.quit()
-        print("Email sent successfully.")
+        logging.info("Email sent successfully.")
     except Exception as e:
-        print(f"Failed to send email: {e}")
+        logging.error(f"Failed to send email: {e}")
 
 if __name__ == "__main__":
     import sys
     if len(sys.argv) != 3:
-        print("Usage: send_email.py <subject> <body>")
+        logging.error("Usage: send_email.py <subject> <body>")
         sys.exit(1)
     subject = sys.argv[1]
     body = sys.argv[2]
