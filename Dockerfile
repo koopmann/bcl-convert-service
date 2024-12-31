@@ -18,10 +18,9 @@ RUN yum install -y gdb rsync mailx python3 && \
     yum clean all && \
     rm -rf /var/cache/yum
 
-# Install pip and required Python libraries
-RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
-    python3 get-pip.py && \
-    pip install smtplib email
+# Install pip
+RUN curl https://bootstrap.pypa.io/pip/3.6/get-pip.py -o get-pip.py && \
+    python3 get-pip.py
 
 # Copy the Python email script
 COPY send_email.py /usr/local/bin/send_email.py
