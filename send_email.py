@@ -20,6 +20,7 @@ def send_mail(subject, body, recipients):
     logging.debug(f"SMTP Server: {smtp_server}")
     logging.debug(f"SMTP Port: {smtp_port}")
     logging.debug(f"SMTP User: {smtp_user}")
+    logging.debug(f"SMTP psss: {smtp_pass}")
     logging.debug(f"Recipients: {recipients}")
 
     # Create the email
