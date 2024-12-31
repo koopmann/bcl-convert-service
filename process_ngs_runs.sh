@@ -15,14 +15,12 @@ IFS=',' read -r -a RECIPIENTS <<< "${RECIPIENTS}"
 sendMail() {
   local subject=$1
   local body=$2
-  local recipients=$(IFS=,; echo "${RECIPIENTS[*]}")
 
   echo "Sending email with subject: ${subject}"
   echo "Email body: ${body}"
-  echo "Recipients: ${recipients}"
 
-# Send the email
-  echo -e "Subject: ${subject}\n\n${body}" | msmtp ${recipients}
+  # Call the Python script to send the email
+  python3 /usr/local/bin/send_email.py "${subject}" "${body}"
 
   if [ $? -eq 0 ]; then
     echo "Email sent successfully."
@@ -32,6 +30,7 @@ sendMail() {
 }
 
 process_ngs_runs() {
+  sendMail "Rsync failed for Run: $runfolder" "Lauf: $runfolder"
   echo "Starting NGS run processing..."
   for runfolder in "$RUNFOLDER_PATH"/*; do
     if [ -d "$runfolder" ]; then
@@ -88,7 +87,7 @@ process_ngs_runs() {
         done
 
         if [ "$already_processed" = false ]; then
-          if [ -z "$(find "$runfolder" -mmin -5)" ]; then
+          if [ -z "$(find "$runfolder" -mmin -1)" ]; then
             echo "Start processing folder: $runfolder"
             command="bcl-convert --strict-mode true --force --bcl-only-matched-reads true --bcl-sampleproject-subdirectories true --bcl-input-directory $runfolder --sample-sheet $sample_sheet_full_path --output-directory $outputfolder_run_path_subdir > $outputfolder_run_path_subdir/bcl2fastq2_output.txt"
             echo "Executing command: $command"

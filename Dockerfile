@@ -12,25 +12,19 @@ RUN sed -i s/^mirrorlist=http/#mirrorlist=http/g /etc/yum.repos.d/CentOS-*.repo
 ADD bcl-convert-4.3.6-2.el7.x86_64.rpm /tmp/bcl-convert.rpm
 
 # Install dependencies and bcl-convert
-RUN yum install -y gdb rsync mailx msmtp && \
+RUN yum install -y gdb rsync mailx python3 && \
     rpm -i /tmp/bcl-convert.rpm && \
     rm /tmp/bcl-convert.rpm && \
     yum clean all && \
     rm -rf /var/cache/yum
 
-# Create the .msmtp directory and set up msmtp configuration
-RUN mkdir -p /root/.msmtp
+# Install pip and required Python libraries
+RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
+    python3 get-pip.py && \
+    pip install smtplib email
 
-# Configure msmtp using the environment variables
-RUN echo "account default\n\
-host \$SMTP_SERVER\n\
-port \$SMTP_PORT\n\
-from \$SMTP_USER\n\
-user \$SMTP_USER\n\
-passwordeval echo \$SMTP_PASS\n\
-tls on\n\
-auth on" > /root/.msmtp/msmtprc && \
-    chmod 600 /root/.msmtp/msmtprc
+# Copy the Python email script
+COPY send_email.py /usr/local/bin/send_email.py
 
 # Ensure the main script is executable
 RUN chmod +x /usr/local/bin/process_ngs_runs.sh
