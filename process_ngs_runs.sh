@@ -10,11 +10,17 @@ SMTP_SERVER=${SMTP_SERVER}
 SMTP_PORT=${SMTP_PORT}
 SMTP_USER=${SMTP_USER}
 SMTP_PASS=${SMTP_PASS}
-IFS=',' read -r -a RECIPIENTS <<< "${RECIPIENTS}"
+RECIPIENTS=${RECIPIENTS:-"default@example.com"}  # Set a default recipient if not provided
+
 
 sendMail() {
   local subject=$1
   local body=$2
+
+  if [ -z "$RECIPIENTS" ] || [ -z "$subject" ]; then
+    echo "Missing environment variables: recipients or subject"
+    return 1
+  fi
 
   echo "Sending email with subject: ${subject}"
   echo "Email body: ${body}"
