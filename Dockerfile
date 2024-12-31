@@ -21,7 +21,8 @@ RUN yum install -y gdb rsync mailx python3 && \
 # Copy the Python email script
 COPY send_email.py /usr/local/bin/send_email.py
 
-# Ensure the main script is executable
+# Copy the main script and ensure it is executable
+COPY process_ngs_runs.sh /usr/local/bin/process_ngs_runs.sh
 RUN chmod +x /usr/local/bin/process_ngs_runs.sh
 
 # Set the default entrypoint to run the process_ngs_runs.sh script
