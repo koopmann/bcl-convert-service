@@ -12,6 +12,7 @@ def send_mail(subject, body, recipients):
     smtp_port = os.getenv("SMTP_PORT")
     smtp_user = os.getenv("SMTP_USER")
     smtp_pass = os.getenv("SMTP_PASS")
+    smtp_from = os.getenv("SMTP_FROM")
 
     if not recipients or not subject:
         logging.error("Missing environment variables: recipients or subject")
@@ -20,12 +21,11 @@ def send_mail(subject, body, recipients):
     logging.debug(f"SMTP Server: {smtp_server}")
     logging.debug(f"SMTP Port: {smtp_port}")
     logging.debug(f"SMTP User: {smtp_user}")
-    logging.debug(f"SMTP psss: {smtp_pass}")
     logging.debug(f"Recipients: {recipients}")
 
     # Create the email
     msg = MIMEMultipart()
-    msg['From'] = smtp_user
+    msg['From'] = smtp_from
     msg['To'] = recipients
     msg['Subject'] = subject
     msg.attach(MIMEText(body, 'plain'))
