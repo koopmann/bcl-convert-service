@@ -105,7 +105,7 @@ process_ngs_runs() {
 
             mkdir -p "$targetfolder_run_path_subdir"
             echo "Copying from $outputfolder_run_path_subdir to $targetfolder_run_path_subdir"
-            cp -rp "$outputfolder_run_path_subdir/" "$targetfolder_run_path_subdir" && \
+            cp -rp "$outputfolder_run_path_subdir/"* "$targetfolder_run_path_subdir" && \
             echo "Running rsync..." && \
             rsync -aiu "$runfolder/" "$TARGETFOLDER_PATH/$runname/" >> "$LOG_PATH/preprocess_ngs_rsync.log"
             if [ $? -ne 0 ]; then
