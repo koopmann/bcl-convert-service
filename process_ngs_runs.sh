@@ -10,15 +10,15 @@ SMTP_SERVER=${SMTP_SERVER}
 SMTP_PORT=${SMTP_PORT}
 SMTP_USER=${SMTP_USER}
 SMTP_PASS=${SMTP_PASS}
-RECIPIENTS=${RECIPIENTS:-"default@example.com"}  # Set a default recipient if not provided
+MAIL_RECIPIENTS=${MAIL_RECIPIENTS:-"default@example.com"}  # Set a default recipient if not provided
 
 
 sendMail() {
   local subject=$1
   local body=$2
 
-  if [ -z "$RECIPIENTS" ] || [ -z "$subject" ]; then
-    echo "Missing environment variables: recipients or subject"
+  if [ -z "$MAIL_RECIPIENTS" ] || [ -z "$subject" ]; then
+    echo "Missing environment variables: mail_recipients or subject"
     return 1
   fi
 
@@ -94,7 +94,7 @@ process_ngs_runs() {
         if [ "$already_processed" = false ]; then
           if [ -z "$(find "$runfolder" -mmin -5)" ]; then
             echo "Start processing folder: $runfolder"
-            command="bcl-convert --strict-mode true --force --bcl-only-matched-reads true --bcl-sampleproject-subdirectories true --bcl-input-directory $runfolder --sample-sheet $sample_sheet_full_path --output-directory $outputfolder_run_path_subdir > $outputfolder_run_path_subdir/bcl2fastq2_output.txt"
+            command="bcl-convert $BCL_CONVERT_PARAMS --bcl-input-directory $runfolder --sample-sheet $sample_sheet_full_path --output-directory $outputfolder_run_path_subdir > $outputfolder_run_path_subdir/bcl2fastq2_output.txt"
             echo "Executing command: $command"
             eval "$command"
 
@@ -103,9 +103,9 @@ process_ngs_runs() {
               sleep 120
             done
 
-            echo "Copying output to target folder..."
             mkdir -p "$targetfolder_run_path_subdir"
-            cp -rp "$outputfolder_run_path_subdir/" "$targetfolder_run_path_subdir/" && \
+            echo "Copying from $outputfolder_run_path_subdir to $targetfolder_run_path_subdir"
+            cp -rp "$outputfolder_run_path_subdir/" "$targetfolder_run_path_subdir" && \
             echo "Running rsync..." && \
             rsync -aiu "$runfolder/" "$TARGETFOLDER_PATH/$runname/" >> "$LOG_PATH/preprocess_ngs_rsync.log"
             if [ $? -ne 0 ]; then

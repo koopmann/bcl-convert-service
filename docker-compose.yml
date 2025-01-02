@@ -10,7 +10,8 @@ services:
       - SMTP_USER=${SMTP_USER}
       - SMTP_FROM=${SMTP_FROM}
       - SMTP_PASS=${SMTP_PASS}
-      - RECIPIENTS=${RECIPIENTS}
+      - MAIL_RECIPIENTS=${MAIL_RECIPIENTS}
+      - BCL_CONVERT_PARAMS=${BCL_CONVERT_PARAMS}
     volumes:
       - ${RUNFOLDER_PATH}:/mnt/run
       - ${SAMPLESHEET_PATH}:/mnt/samplesheets
