@@ -12,6 +12,9 @@ RUN sed -i s/^mirrorlist=http/#mirrorlist=http/g /etc/yum.repos.d/CentOS-*.repo
 ARG BCL_CONVERT_RPM
 ADD ${BCL_CONVERT_RPM} /tmp/bcl-convert.rpm
 
+# List contents of /tmp to verify RPM file
+RUN ls -l /tmp
+
 # Install dependencies and bcl-convert
 RUN yum install -y gdb rsync mailx python3 && \
     rpm -i /tmp/bcl-convert.rpm && \
