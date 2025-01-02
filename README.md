@@ -27,7 +27,7 @@ cd bcl-convert-service
 Download the `bcl-convert` RPM for CentOS from the Illumina website and place it in the same directory as the `Dockerfile`. Ensure the RPM file name matches the one given in the  `Dockerfile` file.
 
 ### Step 3: Create the `.env` File
-Create a `.env` file in the root directory of the project with the following content:
+Create a `.env` file in the root directory of the project with your individual settings, see also `example.env` :
 
 ```dotenv
 SMTP_SERVER=smtp.example.com
