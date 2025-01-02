@@ -106,7 +106,8 @@ process_ngs_runs() {
             echo "Copying from $outputfolder_run_path_subdir to $targetfolder_run_path_subdir"
             cp -rp "$outputfolder_run_path_subdir/"* "$targetfolder_run_path_subdir" && \
             echo "Running rsync to ensure everything was copied..." && \
-            rsync -aiu "$outputfolder_run_path_subdir/" "$targetfolder_run_path_subdir/" >> "$LOG_PATH/rsync.log"            if [ $? -ne 0 ]; then
+            rsync -aiu "$outputfolder_run_path_subdir/" "$targetfolder_run_path_subdir/" >> "$LOG_PATH/rsync.log"
+            if [ $? -ne 0 ]; then
               echo "Rsync failed for Run: $runfolder"
               sendMail "Rsync failed for Run: $runfolder" "Lauf: $runfolder"
             fi
