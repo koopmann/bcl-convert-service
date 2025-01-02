@@ -12,9 +12,12 @@ services:
       - SMTP_PASS=${SMTP_PASS}
       - MAIL_RECIPIENTS=${MAIL_RECIPIENTS}
       - BCL_CONVERT_PARAMS=${BCL_CONVERT_PARAMS}
+      - OUTPUTFOLDER_PATH_SUBDIR=${OUTPUTFOLDER_PATH_SUBDIR}
+      - SYNC_WHOLE_RUNFOLDER_TO_TARGETFOLDER=${SYNC_WHOLE_RUNFOLDER_TO_TARGETFOLDER}
     volumes:
-      - ${RUNFOLDER_PATH}:/mnt/run
       - ${SAMPLESHEET_PATH}:/mnt/samplesheets
+      - ${RUNFOLDER_PATH}:/mnt/run
+      - ${OUTPUTFOLDER_PATH}:/mnt/output
       - ${TARGETFOLDER_PATH}:/mnt/target
       - ${LOG_PATH}:/var/log/bcl-convert
       - ./process_ngs_runs.sh:/usr/local/bin/process_ngs_runs.sh

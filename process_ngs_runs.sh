@@ -2,9 +2,10 @@
 
 RUNFOLDER_PATH="/mnt/run"
 SAMPLESHEET_PATH="/mnt/samplesheets"
-OUTPUTFOLDER_PATH_PREFIX="/mnt/run"
-OUTPUTFOLDER_PATH_SUBDIR="/Data/Intensities/BaseCalls"
+OUTPUTFOLDER_PATH=${OUTPUTFOLDER_PATH:-"/mnt/run"}
+OUTPUTFOLDER_PATH_SUBDIR=${OUTPUTFOLDER_PATH_SUBDIR}
 TARGETFOLDER_PATH="/mnt/target"
+SYNC_WHOLE_RUNFOLDER_TO_TARGETFOLDER=${SYNC_WHOLE_RUNFOLDER_TO_TARGETFOLDER:-"false"}
 LOG_PATH="/var/log/bcl-convert"
 SMTP_SERVER=${SMTP_SERVER}
 SMTP_PORT=${SMTP_PORT}
@@ -41,8 +42,10 @@ process_ngs_runs() {
     if [ -d "$runfolder" ]; then
       runname=$(basename "$runfolder")
       sample_sheet_full_path="$SAMPLESHEET_PATH/${runname}_SampleSheet.csv"
-      outputfolder_run_path="$OUTPUTFOLDER_PATH_PREFIX/${runname}"
+      outputfolder_run_path="$OUTPUTFOLDER_PATH/${runname}"
       outputfolder_run_path_subdir="${outputfolder_run_path}$OUTPUTFOLDER_PATH_SUBDIR"
+      #ensure that path exists
+      mkdir -p "$outputfolder_run_path_subdir"
 
       targetfolder_run_path="$TARGETFOLDER_PATH/${runname}"
       targetfolder_run_path_subdir="${targetfolder_run_path}$OUTPUTFOLDER_PATH_SUBDIR"
@@ -57,33 +60,29 @@ process_ngs_runs() {
         continue
       fi
 
-      if [ -f "$sample_sheet_full_path" ]; then
-        echo "Sample sheet found: $sample_sheet_full_path"
-      else
+      if [ ! -f "$sample_sheet_full_path" ]; then
         echo "Sample sheet missing: $sample_sheet_full_path"
+        echo "skipping folder: $runfolder"
       fi
 
-      if [ -f "$runfolder/CopyComplete.txt" ]; then
-        echo "CopyComplete.txt found in $runfolder"
-      else
+      if [ ! -f "$runfolder/CopyComplete.txt" ]; then
         echo "CopyComplete.txt missing in $runfolder"
+        echo "skipping folder: $runfolder"
       fi
 
-      if [ -f "$runfolder/RTAComplete.txt" ]; then
-        echo "RTAComplete.txt found in $runfolder"
-      else
+      if [ ! -f "$runfolder/RTAComplete.txt" ]; then
         echo "RTAComplete.txt missing in $runfolder"
+        echo "skipping folder: $runfolder"
       fi
 
       if [ -f "$outputfolder_run_path_subdir/Logs/FastqComplete.txt" ]; then
         echo "FastqComplete.txt already exists in $outputfolder_run_path_subdir"
-      else
-        echo "FastqComplete.txt missing in $outputfolder_run_path_subdir"
+        echo "skipping folder: $runfolder"
       fi
 
       if [ -f "$sample_sheet_full_path" ] && [ -f "$runfolder/CopyComplete.txt" ] && [ -f "$runfolder/RTAComplete.txt" ] && [ ! -f "$outputfolder_run_path_subdir/Logs/FastqComplete.txt" ]; then
         already_processed=false
-        for file in "$outputfolder_run_path_subdir/"*.fastq.gz; do
+        for file in $(find "$outputfolder_run_path_subdir" -name "*.fastq.gz"); do
           if [ -f "$file" ]; then
             already_processed=true
             echo "Skipped folder because of existing fastq.gz: $file"
@@ -102,15 +101,24 @@ process_ngs_runs() {
               echo "Waiting for FastqComplete.txt..."
               sleep 120
             done
-
+            # COPY generated files to final destination
             mkdir -p "$targetfolder_run_path_subdir"
             echo "Copying from $outputfolder_run_path_subdir to $targetfolder_run_path_subdir"
             cp -rp "$outputfolder_run_path_subdir/"* "$targetfolder_run_path_subdir" && \
             echo "Running rsync to ensure everything was copied..." && \
-            rsync -aiu "$runfolder/" "$TARGETFOLDER_PATH/$runname/" >> "$LOG_PATH/rsync.log"
-            if [ $? -ne 0 ]; then
+            rsync -aiu "$outputfolder_run_path_subdir/" "$targetfolder_run_path_subdir/" >> "$LOG_PATH/rsync.log"            if [ $? -ne 0 ]; then
               echo "Rsync failed for Run: $runfolder"
               sendMail "Rsync failed for Run: $runfolder" "Lauf: $runfolder"
+            fi
+
+            # Sync the whole runfolder to targetfolder
+            if [ "$SYNC_WHOLE_RUNFOLDER_TO_TARGETFOLDER" = "true" ]; then
+              echo "Running rsync to sync the whole runfolder to targetfolder..."
+              rsync -aiu "$runfolder/" "$targetfolder_run_path/" >> "$LOG_PATH/rsync.log"
+              if [ $? -ne 0 ]; then
+                echo "Rsync failed for Run: $runfolder"
+                sendMail "Rsync failed for Run: $runfolder" "Lauf: $runfolder"
+              fi
             fi
 
             echo "BCL to FASTQ conversion complete for Run: $runfolder"
