@@ -24,7 +24,7 @@ cd bcl-convert-service
 ```
 
 ### Step 2: Download the `bcl-convert` RPM
-Download the `bcl-convert` RPM for CentOS from the Illumina website and place it in the same directory as the `Dockerfile`. Ensure the RPM file name matches the environment variable `BCL_CONVERT_RPM` in the `.env` file.
+Download the `bcl-convert` RPM for CentOS from the Illumina website and place it in the same directory as the `Dockerfile`. Ensure the RPM file name matches the one given in the  `Dockerfile` file.
 
 ### Step 3: Create the `.env` File
 Create a `.env` file in the root directory of the project with the following content:
@@ -40,7 +40,6 @@ SAMPLESHEET_PATH=/path/to/samplesheets
 TARGETFOLDER_PATH=/path/to/target
 LOG_PATH=./logs
 MAIL_RECIPIENTS=recipient1@example.com,recipient2@example.com
-BCL_CONVERT_RPM=bcl-convert-4.3.6-2.el7.x86_64.rpm
 BCL_CONVERT_PARAMS=--strict-mode true --force --bcl-only-matched-reads true --bcl-sampleproject-subdirectories true
 ```
 

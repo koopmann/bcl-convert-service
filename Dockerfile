@@ -9,8 +9,7 @@ RUN sed -i s/^#.*baseurl=http/baseurl=http/g /etc/yum.repos.d/CentOS-*.repo
 RUN sed -i s/^mirrorlist=http/#mirrorlist=http/g /etc/yum.repos.d/CentOS-*.repo
 
 # Add bcl-convert RPM using environment variable
-ARG BCL_CONVERT_RPM
-ADD ${BCL_CONVERT_RPM} /tmp/bcl-convert.rpm
+ADD bcl-convert-4.3.6-2.el7.x86_64.rpm /tmp/bcl-convert.rpm
 
 # List contents of /tmp to verify RPM file
 RUN ls -l /tmp

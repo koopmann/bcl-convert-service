@@ -106,12 +106,19 @@ process_ngs_runs() {
             mkdir -p "$targetfolder_run_path_subdir"
             echo "Copying from $outputfolder_run_path_subdir to $targetfolder_run_path_subdir"
             cp -rp "$outputfolder_run_path_subdir/"* "$targetfolder_run_path_subdir" && \
-            echo "Running rsync..." && \
-            rsync -aiu "$runfolder/" "$TARGETFOLDER_PATH/$runname/" >> "$LOG_PATH/preprocess_ngs_rsync.log"
+            echo "Running rsync to ensure everything was copied..." && \
+            rsync_log_file="$LOG_PATH/rsync.log"
+            rsync -aiu "$runfolder/" "$TARGETFOLDER_PATH/$runname/" --log-file="$rsync_log_file"
             if [ $? -ne 0 ]; then
               echo "Rsync failed for Run: $runfolder"
               sendMail "Rsync failed for Run: $runfolder" "Lauf: $runfolder"
+            elif [ -s "$rsync_log_file" ]; then
+              cat "$rsync_log_file" >> "$LOG_PATH/preprocess_ngs_rsync.log"
+              echo "Rsync completed with additional data transferred for Run: $runfolder"
+            else
+              echo "Rsync completed with no additional data transfer for Run: $runfolder"
             fi
+            rm -f "$rsync_log_file"
 
             echo "BCL to FASTQ conversion complete for Run: $runfolder"
             sendMail "BCL to FASTQ conversion complete for Run: $runfolder" "Lauf: $runfolder"

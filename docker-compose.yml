@@ -12,7 +12,6 @@ services:
       - SMTP_PASS=${SMTP_PASS}
       - MAIL_RECIPIENTS=${MAIL_RECIPIENTS}
       - BCL_CONVERT_PARAMS=${BCL_CONVERT_PARAMS}
-      - BCL_CONVERT_RPM=${BCL_CONVERT_RPM}
     volumes:
       - ${RUNFOLDER_PATH}:/mnt/run
       - ${SAMPLESHEET_PATH}:/mnt/samplesheets
