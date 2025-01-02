@@ -91,7 +91,7 @@ process_ngs_runs() {
         done
 
         if [ "$already_processed" = false ]; then
-          if [ -z "$(find "$runfolder" -mmin -5)" ]; then
+          if [ -z "$(find "$runfolder" -mmin -5)" ] && [ -z "$(find "$outputfolder_run_path_subdir" -mmin -5)" ]; then
             echo "Start processing folder: $runfolder"
             command="bcl-convert $BCL_CONVERT_PARAMS --bcl-input-directory $runfolder --sample-sheet $sample_sheet_full_path --output-directory $outputfolder_run_path_subdir > $outputfolder_run_path_subdir/bcl2fastq2_output.txt"
             echo "Executing command: $command"
