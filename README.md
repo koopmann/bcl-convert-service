@@ -78,4 +78,4 @@ You can run this service periodically using a cron job. For example, you can add
 - Check the logs in the `LOG_PATH` directory for any errors or issues.
 
 ## License
-This project is licensed under the MIT License. See the `LICENSE` file for more details.
+This project is licensed under the GNU GENERAL PUBLIC LICENSE License. See the `LICENSE` file for more details.
